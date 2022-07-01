@@ -1,0 +1,26 @@
+/*Step one: Upload the order data with comma sperator  */
+orders = LOAD '/user/maria_dev/orders.csv'  USING PigStorage(',')AS
+	(orderID:chararray,
+    value1:chararray,
+    value2:chararray,
+    location:chararray,
+    target:chararray,
+    value3:chararray,
+    value4:chararray,
+    value5:chararray,
+    value6:chararray);
+
+/*Step two: define the target and filter out all the rows are not including the target */
+Filtered_array = Filter orders BY target == '"Holland"';
+
+/*Step three: Count the target for each location. */
+grouped_array = GROUP Filtered_array BY (location, target);
+
+/*Step four: add the traget count for each location */
+location_target_count = FOREACH grouped_array GENERATE group, COUNT(Filtered_array);             
+
+/*Step five: order the location with target count array */
+ordered_list = ORDER location_target_count BY $0 ASC;
+
+/*Step six: print the ordered array */
+DUMP ordered_list;
